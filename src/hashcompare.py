@@ -1,5 +1,6 @@
-from js import Headers, Response
+from js import Headers
 from urllib.parse import urlsplit, parse_qs
+from workers import WorkerEntrypoint, Response, Request
 
 hashes = [
     "9c4163ba63be945d06e24bb635dd364b59274d84b6589d14c924b64bb515e9b6",
@@ -63,24 +64,25 @@ hashes = [
     "815d5e322f8100fc315f5aea6375dd65db92a50dacf1989a070f8d1d5ae23a78"
 ]
 
-def on_fetch(request) -> Response:
-    try:
-        url = urlsplit(request.url)
-        queries = parse_qs(url.query)
-        headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
-        if "hash" not in queries.keys():
-            return Response.new('{"error": "Missing \'hash\' parameter"}', headers=headers, status=400)
-        hash_from_user = queries["hash"][0]
-        if len(hash_from_user) != 64:
-            return Response.new('{"error": "\'hash\' parameter must be 64 characters long"}', headers=headers, status=400)
-        result: bool = compare_hashes(hash_from_user)
-        if result:
-            return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers)
-        else:
-            return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers, status=404)
-    except Exception as e:
-        headers = Headers.new({"content-type": "text/plain;charset=UTF-8"}.items())
-        return Response.new(e, headers=headers, status=500)
+class Default(WorkerEntrypoint):
+    async def fetch(self, request: Request) -> Response:
+        try:
+            url = urlsplit(request.url)
+            queries = parse_qs(url.query)
+            headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
+            if "hash" not in queries.keys():
+                return Response('{"error": "Missing \'hash\' parameter"}', headers=headers, status=400)
+            hash_from_user = queries["hash"][0]
+            if len(hash_from_user) != 64:
+                return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=headers, status=400)
+            result: bool = compare_hashes(hash_from_user)
+            if result:
+                return Response(format_json(compare_hashes(hash_from_user)), headers=headers)
+            else:
+                return Response(format_json(compare_hashes(hash_from_user)), headers=headers, status=404)
+        except Exception as e:
+            headers = Headers.new({"content-type": "text/plain;charset=UTF-8"}.items())
+            return Response(e, headers=headers, status=500)
 
 def format_json(datum: bool) -> str:
     return f'{{"result": {str(datum).lower()}}}'
