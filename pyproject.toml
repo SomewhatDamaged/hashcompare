@@ -1,5 +1,5 @@
 [project]
-name = "hashcompare"
+name = "comparehashes"
 version = "0.1.0"
 description = "Compare pHashes against built-in list."
 readme = "README.md"
