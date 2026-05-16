@@ -1,4 +1,3 @@
-from yarl import URL
 from js import Headers, Response, Request, status
 
 hashes = [
@@ -64,10 +63,10 @@ hashes = [
 ]
 
 def on_fetch(request: Request) -> Response:
-    url = URL(request.url)
-    if "hash" not in url.query.keys():
+    params = request.args.to_dict()
+    if "hash" not in params.keys():
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
-    hash_from_user = url.query["hash"]
+    hash_from_user = params["hash"]
     headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
     return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers)
 
