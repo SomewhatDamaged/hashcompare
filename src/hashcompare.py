@@ -1,4 +1,4 @@
-from js import Headers, Response, Request, status
+from js import Headers, Response, Request
 
 hashes = [
     "9c4163ba63be945d06e24bb635dd364b59274d84b6589d14c924b64bb515e9b6",
@@ -65,7 +65,7 @@ hashes = [
 def on_fetch(request: Request) -> Response:
     params = request.args.to_dict()
     if "hash" not in params.keys():
-        return Response(status_code=status.HTTP_400_BAD_REQUEST)
+        return Response(status_code=400)
     hash_from_user = params["hash"]
     headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
     return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers)
