@@ -65,8 +65,7 @@ hashes = [
 ]
 
 class Default(WorkerEntrypoint):
-    @staticmethod
-    async def fetch(request: Request) -> Response:
+    async def fetch(self, request: Request) -> Response:
         try:
             url = urlsplit(request.url)
             queries = parse_qs(url.query)
