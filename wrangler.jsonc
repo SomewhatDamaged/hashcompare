@@ -1,5 +1,5 @@
 {
-    "name": "my-python-worker",
+    "name": "comparehashes",
     "main": "src/hashcompare.py",
     "compatibility_date": "2024-04-01",
     "compatibility_flags": ["python_workers"]
