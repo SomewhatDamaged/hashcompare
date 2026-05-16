@@ -1,5 +1,5 @@
-from js import Headers, Response, Request
-
+from js import Headers, Response
+from urllib.parse import urlsplit, parse_qs
 
 hashes = [
     "9c4163ba63be945d06e24bb635dd364b59274d84b6589d14c924b64bb515e9b6",
@@ -63,13 +63,20 @@ hashes = [
     "815d5e322f8100fc315f5aea6375dd65db92a50dacf1989a070f8d1d5ae23a78"
 ]
 
-def on_fetch(request: Request) -> Response:
-    params = request.args.to_dict()
-    if "hash" not in params.keys():
-        return Response(status_code=400)
-    hash_from_user = params["hash"]
-    headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
-    return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers)
+def on_fetch(request) -> Response:
+    try:
+        url = urlsplit(request.url)
+        queries = parse_qs(url.query)
+        headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
+        if "hash" not in queries.keys():
+            return Response.new("{'error': 'Missing \"hash\" parameter'}", status_code=400)
+        hash_from_user = queries["hash"][0]
+        if len(hash_from_user) != 64:
+            return Response.new("{'error': '\"hash\" parameter must be 64 characters long'}", status_code=400)
+        return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers)
+    except Exception as e:
+        headers = Headers.new({"content-type": "text/plain;charset=UTF-8"}.items())
+        return Response.new(e, headers, status_code=500)
 
 def format_json(datum: bool) -> str:
     return f"{{'result': {str(datum).lower()}}}"
