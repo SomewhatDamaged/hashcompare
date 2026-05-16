@@ -69,17 +69,21 @@ def on_fetch(request) -> Response:
         queries = parse_qs(url.query)
         headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
         if "hash" not in queries.keys():
-            return Response.new("{'error': 'Missing \"hash\" parameter'}", status_code=400)
+            return Response.new('{"error": "Missing \'hash\' parameter"}', headers=headers, status=400)
         hash_from_user = queries["hash"][0]
         if len(hash_from_user) != 64:
-            return Response.new("{'error': '\"hash\" parameter must be 64 characters long'}", status_code=400)
-        return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers)
+            return Response.new('{"error": "\'hash\' parameter must be 64 characters long"}', headers=headers, status=400)
+        result: bool = compare_hashes(hash_from_user)
+        if result:
+            return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers)
+        else:
+            return Response.new(format_json(compare_hashes(hash_from_user)), headers=headers, status=404)
     except Exception as e:
         headers = Headers.new({"content-type": "text/plain;charset=UTF-8"}.items())
-        return Response.new(e, headers, status_code=500)
+        return Response.new(e, headers=headers, status=500)
 
 def format_json(datum: bool) -> str:
-    return f"{{'result': {str(datum).lower()}}}"
+    return f'{{"result": {str(datum).lower()}}}'
 
 def compare_hashes(hash_from_user: str) -> bool:
     if hash_from_user in hashes:
