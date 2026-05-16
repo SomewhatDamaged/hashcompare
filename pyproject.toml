@@ -5,7 +5,7 @@ description = "Compare pHashes against built-in list."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "workers-py",
+    "workers-py>=1.90",
     "workers-runtime-sdk"
 ]
 
