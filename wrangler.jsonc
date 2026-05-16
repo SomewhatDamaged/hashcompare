@@ -8,7 +8,8 @@
 	"main": "src/hashcompare.py",
 	"compatibility_date": "2026-05-16",
 	"compatibility_flags": [
-		/**"python_workers" **/
+		"python_workers",
+		"disable_python_external_sdk"
 	],
 	"observability": {
 		"enabled": true
