@@ -1,7 +1,10 @@
 [project]
 name = "hashcompare"
 version = "0.1.0"
-requires-python = ">=3.14"
-dependencies = [
-    "yarl"
-]
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["workers-py", "workers-runtime-sdk"]
