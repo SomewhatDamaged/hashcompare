@@ -74,10 +74,10 @@ class Default(WorkerEntrypoint):
             pathname = pathname[3:]
             if pathname.startswith("/hashcompare"):
                 return await self.hashcompare(request)
-            if pathname.startswith("/hashlist"):
+            elif pathname.startswith("/hashlist"):
                 return await self.hashlist(request)
-
-
+            else:
+                return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
             return Response(traceback.format_exc(), headers=headers, status=500)
