@@ -87,15 +87,15 @@ class Default(WorkerEntrypoint):
         url = urlsplit(request.url)
         queries = parse_qs(url.query)
         if "hash" not in queries.keys():
-            return Response('{"error": "Missing \'hash\' parameter"}', headers=json_header, status=400)
+            return Response('{"error": "Missing \'hash\' parameter"}', headers=self.json_header, status=400)
         hash_from_user = queries["hash"][0]
         if len(hash_from_user) != 64:
-            return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=json_header, status=400)
+            return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=self.json_header, status=400)
         result: bool = compare_hashes(hash_from_user)
-        return Response(f'{{"result": {str(result).lower()}}}', headers=json_header, status=404 if result else 200)
+        return Response(f'{{"result": {str(result).lower()}}}', headers=self.json_header, status=404 if result else 200)
 
     async def hashlist(self, request: Request) -> Response:
-        return Response(dumps(hashes), headers=json_header)
+        return Response(dumps(hashes), headers=self.json_header)
 
 def compare_hashes(hash_from_user: str) -> bool:
     if hash_from_user in hashes:
