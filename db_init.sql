@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS hashes (
-    hash BIGINT PRIMARY KEY
+    hash TEXT PRIMARY KEY
 );
 
 INSERT INTO hashes (hash)
