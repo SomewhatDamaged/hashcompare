@@ -74,10 +74,10 @@ class Default(WorkerEntrypoint):
             pathname = pathname[3:]
             if pathname.startswith("/hashcompare"):
                 return await self.hashcompare(request)
-            if pathname.startswith("/hashlist"):
+            elif pathname.startswith("/hashlist"):
                 return await self.hashlist(request)
-
-
+            else:
+                return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
             return Response(traceback.format_exc(), headers=headers, status=500)
@@ -96,6 +96,13 @@ class Default(WorkerEntrypoint):
     async def hashlist(self, request: Request) -> Response:
         return Response(dumps(hashes), headers=self.json_header)
 
+    async def find_hash(self, phash: str) -> bool:
+        query = "SELECT * FROM hashes WHERE HAMMING(hash,?)"
+        results = await self.env.DB.prepare(query).bind(phash).all()
+        if results.results[0]:
+            return True
+        return False
+
 def compare_hashes(hash_from_user: str) -> bool:
     if hash_from_user in hashes:
         return True
@@ -107,3 +114,10 @@ def compare_hashes(hash_from_user: str) -> bool:
 def hamming_distance(s1: str, s2: str) -> int:
     assert len(s1) == len(s2)
     return bin(int(s1, 16) ^ int(s2, 16)).count("1")
+
+def hamming(s1, s2):
+    s1 = str(s1)
+    s2 = str(s2)
+    if len(s1) != len(s2):
+        return False
+    return hamming_distance(s1, s2) < 4
