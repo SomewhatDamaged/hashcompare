@@ -1,17 +1,10 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "comparehashes",
-	"main": "src/entry.py",
+	"main": "src/hashcompare.py",
 	"compatibility_date": "2025-11-02",
 	"compatibility_flags": [
 		"python_workers"
-	],
-	"d1_databases": [
-		{
-			"binding": "DB", // i.e. available in your Worker on env.DB
-			"database_name": "phashes", // REPLACE WITH YOUR DB NAME
-			"database_id": "4819f431-b19d-4ba7-9be7-12ce53ccc23c" // REPLACE WITH YOUR DB ID
-		}
 	],
 	"observability": {
 		"enabled": true

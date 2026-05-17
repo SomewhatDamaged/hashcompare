@@ -69,16 +69,15 @@ class Default(WorkerEntrypoint):
     json_header = {"content-type": "application/json;charset=UTF-8"}
     async def fetch(self, request: Request) -> Response:
         try:
-            await self.env.DB.create_function("HAMMING", 2, hamming)
             url = urlparse(request.url)
             pathname = url.path
             pathname = pathname[3:]
             if pathname.startswith("/hashcompare"):
                 return await self.hashcompare(request)
-            elif pathname.startswith("/hashlist"):
+            if pathname.startswith("/hashlist"):
                 return await self.hashlist(request)
-            else:
-                return Response(status=404)
+
+
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
             return Response(traceback.format_exc(), headers=headers, status=500)
@@ -91,19 +90,11 @@ class Default(WorkerEntrypoint):
         hash_from_user = queries["hash"][0]
         if len(hash_from_user) != 64:
             return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=self.json_header, status=400)
-        # result: bool = compare_hashes(hash_from_user)
-        result: bool = await self.find_hash(hash_from_user)
+        result: bool = compare_hashes(hash_from_user)
         return Response(f'{{"result": {str(result).lower()}}}', headers=self.json_header, status=404 if result else 200)
 
     async def hashlist(self, request: Request) -> Response:
         return Response(dumps(hashes), headers=self.json_header)
-
-    async def find_hash(self, phash: str) -> bool:
-        query = "SELECT * FROM hashes WHERE HAMMING(hash,?)"
-        results = await self.env.DB.prepare(query).bind(phash).all()
-        if results.results[0]:
-            return True
-        return False
 
 def compare_hashes(hash_from_user: str) -> bool:
     if hash_from_user in hashes:
@@ -116,10 +107,3 @@ def compare_hashes(hash_from_user: str) -> bool:
 def hamming_distance(s1: str, s2: str) -> int:
     assert len(s1) == len(s2)
     return bin(int(s1, 16) ^ int(s2, 16)).count("1")
-
-def hamming(s1, s2):
-    s1 = str(s1)
-    s2 = str(s2)
-    if len(s1) != len(s2):
-        return False
-    return hamming_distance(s1, s2) < 4
