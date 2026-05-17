@@ -66,12 +66,10 @@ hashes = [
 ]
 
 class Default(WorkerEntrypoint):
-    def __init__(self):
-        self.env.DB.create_function("HAMMING", 2, hamming)
-
     json_header = {"content-type": "application/json;charset=UTF-8"}
     async def fetch(self, request: Request) -> Response:
         try:
+            await self.env.DB.create_function("HAMMING", 2, hamming)
             url = urlparse(request.url)
             pathname = url.path
             pathname = pathname[3:]
