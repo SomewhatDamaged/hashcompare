@@ -1,6 +1,8 @@
 from js import Headers
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import urlsplit, parse_qs, urlparse
 from workers import WorkerEntrypoint, Response, Request
+import traceback
+from json import dumps
 
 hashes = [
     "9c4163ba63be945d06e24bb635dd364b59274d84b6589d14c924b64bb515e9b6",
@@ -65,27 +67,35 @@ hashes = [
 ]
 
 class Default(WorkerEntrypoint):
+    json_header = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
     async def fetch(self, request: Request) -> Response:
         try:
-            url = urlsplit(request.url)
-            queries = parse_qs(url.query)
-            headers = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
-            if "hash" not in queries.keys():
-                return Response('{"error": "Missing \'hash\' parameter"}', headers=headers, status=400)
-            hash_from_user = queries["hash"][0]
-            if len(hash_from_user) != 64:
-                return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=headers, status=400)
-            result: bool = compare_hashes(hash_from_user)
-            if result:
-                return Response(format_json(compare_hashes(hash_from_user)), headers=headers)
-            else:
-                return Response(format_json(compare_hashes(hash_from_user)), headers=headers, status=404)
-        except Exception as e:
-            headers = Headers.new({"content-type": "text/plain;charset=UTF-8"}.items())
-            return Response(e, headers=headers, status=500)
+            url = urlparse(request.url)
+            pathname = url.path
+            pathname = pathname[3:]
+            if pathname.startswith("/hashcompare"):
+                return await self.hashcompare(request)
+            if pathname.startswith("/hashlist"):
+                return await self.hashlist(request)
 
-def format_json(datum: bool) -> str:
-    return f'{{"result": {str(datum).lower()}}}'
+
+        except Exception:
+            headers = Headers.new({"content-type": "text/plain;charset=UTF-8"}.items())
+            return Response(traceback.format_exc(), headers=headers, status=500)
+
+    async def hashcompare(self, request: Request) -> Response:
+        url = urlsplit(request.url)
+        queries = parse_qs(url.query)
+        if "hash" not in queries.keys():
+            return Response('{"error": "Missing \'hash\' parameter"}', headers=json_header, status=400)
+        hash_from_user = queries["hash"][0]
+        if len(hash_from_user) != 64:
+            return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=json_header, status=400)
+        result: bool = compare_hashes(hash_from_user)
+        return Response(f'{{"result": {str(result).lower()}}}', headers=json_header, status=404 if result else 200)
+
+    async def hashlist(self, request: Request) -> Response:
+        return Response(dumps(hashes), headers=json_header)
 
 def compare_hashes(hash_from_user: str) -> bool:
     if hash_from_user in hashes:
