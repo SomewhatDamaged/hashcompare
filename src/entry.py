@@ -96,7 +96,7 @@ class Default(WorkerEntrypoint):
         return Response(f'{{"result": {str(result).lower()}}}', headers=self.json_header, status=404 if result else 200)
 
     async def hashlist(self, request: Request) -> Response:
-        return Response(dumps(await self.get_hash()), headers=self.json_header)
+        return Response(dumps(hashes), headers=self.json_header)
 
     async def find_hash(self, phash: str) -> bool:
         query = "SELECT * FROM hashes WHERE HAMMING(hash,?)"
@@ -104,11 +104,6 @@ class Default(WorkerEntrypoint):
         if results.results[0]:
             return True
         return False
-
-    async def get_hash(self) -> list:
-        query = "SELECT * FROM hashes"
-        results = await self.env.DB.prepare(query).all()
-        return results.results[0]
 
 def compare_hashes(hash_from_user: str) -> bool:
     if hash_from_user in hashes:
