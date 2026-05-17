@@ -1,4 +1,3 @@
-from js import Headers
 from urllib.parse import urlsplit, parse_qs, urlparse
 from workers import WorkerEntrypoint, Response, Request
 import traceback
@@ -67,7 +66,7 @@ hashes = [
 ]
 
 class Default(WorkerEntrypoint):
-    json_header = Headers.new({"content-type": "application/json;charset=UTF-8"}.items())
+    json_header = {"content-type": "application/json;charset=UTF-8"}
     async def fetch(self, request: Request) -> Response:
         try:
             url = urlparse(request.url)
@@ -80,7 +79,7 @@ class Default(WorkerEntrypoint):
 
 
         except Exception:
-            headers = Headers.new({"content-type": "text/plain;charset=UTF-8"}.items())
+            headers = {"content-type": "text/plain;charset=UTF-8"}
             return Response(traceback.format_exc(), headers=headers, status=500)
 
     async def hashcompare(self, request: Request) -> Response:
