@@ -31,7 +31,7 @@ class Default(WorkerEntrypoint):
         if len(hash_from_user) != 64:
             return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=self.json_header, status=400)
         result: bool = await self.compare_hashes(hash_from_user)
-        return Response(f'{{"result": {str(result).lower()}}}', headers=self.json_header, status=404 if result else 200)
+        return Response(f'{{"result": {str(result).lower()}}}', headers=self.json_header, status=404 if not result else 200)
 
     async def hashlist(self, request: Request) -> Response:
         return Response(dumps(await self.hashes()), headers=self.json_header)
