@@ -4,7 +4,7 @@ import traceback
 from json import dumps, load
 
 
-with open('hashcompare.json', 'r') as f:
+with open('hashes.json', 'r') as f:
     hashes = load(f)
 
 class Default(WorkerEntrypoint):
