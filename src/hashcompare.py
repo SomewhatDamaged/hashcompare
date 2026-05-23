@@ -5,7 +5,7 @@ from json import dumps, load
 
 
 with open('hashcompare.json', 'r') as f:
-    hashes = json.load(f)
+    hashes = load(f)
 
 class Default(WorkerEntrypoint):
     json_header = {"content-type": "application/json;charset=UTF-8"}
