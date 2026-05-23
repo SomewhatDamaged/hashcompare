@@ -19,7 +19,8 @@ class Default(WorkerEntrypoint):
                 return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
-            return Response(traceback.format_exc(), headers=headers, status=500)
+            hashes = await self.env.KV.get("scam_hashes")
+            return Response(traceback.format_exc() + f"\nHashes: {hashes}", headers=headers, status=500)
 
     async def hashcompare(self, request: Request) -> Response:
         url = urlsplit(request.url)
@@ -44,7 +45,7 @@ class Default(WorkerEntrypoint):
         return False
 
     async def hashes(self) -> list:
-        return ( await self.env.KV.get("scam_hashes") )["phashes"]
+        return await self.env.KV.get("scam_hashes")
 
 
 def hamming_distance(s1: str, s2: str) -> int:
