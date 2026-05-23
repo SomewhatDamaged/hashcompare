@@ -19,8 +19,7 @@ class Default(WorkerEntrypoint):
                 return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
-            hashes = loads(str(await self.env.KV.get("phashes")).strip())
-            return Response(f"Traceback: {traceback.format_exc()}\nHashes: {hashes}", headers=headers, status=500)
+            return Response(f"Traceback: {traceback.format_exc()}", headers=headers, status=500)
 
     async def hashcompare(self, request: Request) -> Response:
         url = urlsplit(request.url)
