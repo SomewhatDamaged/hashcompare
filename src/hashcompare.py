@@ -4,9 +4,6 @@ import traceback
 from json import dumps, load
 
 
-with open('hashes.json', 'r') as f:
-    hashes = load(f)
-
 class Default(WorkerEntrypoint):
     json_header = {"content-type": "application/json;charset=UTF-8"}
     async def fetch(self, request: Request) -> Response:
@@ -32,19 +29,23 @@ class Default(WorkerEntrypoint):
         hash_from_user = queries["hash"][0]
         if len(hash_from_user) != 64:
             return Response('{"error": "\'hash\' parameter must be 64 characters long"}', headers=self.json_header, status=400)
-        result: bool = compare_hashes(hash_from_user)
+        result: bool = await self.compare_hashes(hash_from_user)
         return Response(f'{{"result": {str(result).lower()}}}', headers=self.json_header, status=404 if result else 200)
 
     async def hashlist(self, request: Request) -> Response:
-        return Response(dumps(hashes), headers=self.json_header)
+        return Response(dumps(await self.hashes()), headers=self.json_header)
 
-def compare_hashes(hash_from_user: str) -> bool:
-    if hash_from_user in hashes:
-        return True
-    for hash_to_check in hashes:
-        if hamming_distance(hash_from_user, hash_to_check) < 4:
+    async def compare_hashes(self, hash_from_user: str) -> bool:
+        if hash_from_user in await self.hashes():
             return True
-    return False
+        for hash_to_check in await self.hashes():
+            if hamming_distance(hash_from_user, hash_to_check) < 4:
+                return True
+        return False
+
+    async def hashes(self) -> list:
+        return await self.env.KV.get("scam_hashes")["phashes"]
+
 
 def hamming_distance(s1: str, s2: str) -> int:
     assert len(s1) == len(s2)
