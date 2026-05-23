@@ -1,7 +1,7 @@
 from urllib.parse import urlsplit, parse_qs, urlparse
 from workers import WorkerEntrypoint, Response, Request
 import traceback
-from json import dumps, load
+from json import dumps, loads
 
 
 class Default(WorkerEntrypoint):
@@ -19,7 +19,7 @@ class Default(WorkerEntrypoint):
                 return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
-            hashes = await self.env.KV.get("phashes")
+            hashes = loads(await self.env.KV.get("phashes").strip())
             return Response(f"Traceback: {traceback.format_exc()}\nHashes: {hashes}", headers=headers, status=500)
 
     async def hashcompare(self, request: Request) -> Response:
@@ -45,7 +45,7 @@ class Default(WorkerEntrypoint):
         return False
 
     async def hashes(self) -> list:
-        return await self.env.KV.get("phashes")
+        return loads(await self.env.KV.get("phashes").strip())
 
 
 def hamming_distance(s1: str, s2: str) -> int:
