@@ -44,7 +44,7 @@ class Default(WorkerEntrypoint):
         return False
 
     async def hashes(self) -> list:
-        return await self.env.KV.get("scam_hashes")["phashes"]
+        return ( await self.env.KV.get("scam_hashes") )["phashes"]
 
 
 def hamming_distance(s1: str, s2: str) -> int:
