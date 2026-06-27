@@ -76,7 +76,7 @@ class Default(WorkerEntrypoint):
                 / settings.image_data["dimensions"]["height"]
                 - image_data2["dimensions"]["width"]
                 / image_data2["dimensions"]["height"]
-            ) <= 0.05:
+            ) <= 0.05 and hamming_distance(hash_from_user, hash_to_check) < 10:
                 return 5
         return 0
 
@@ -85,8 +85,6 @@ class Default(WorkerEntrypoint):
 
     async def hashes_and_dimensions(self) -> list[dict]:
         return loads(str(await self.env.KV.get("phashes_and_dimensions")).strip())
-
-
 
 
 def hamming_distance(s1: str, s2: str) -> int:
