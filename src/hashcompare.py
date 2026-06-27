@@ -66,19 +66,18 @@ class Default(WorkerEntrypoint):
         if hash_from_user in hashes:
             return 10
         hashes_and_dimensions = await self.hashes_and_dimensions()
+        best_score: Union[float, int] = 0
         for datum in hashes_and_dimensions:
             hash_to_check: str = datum["phash"]
             dimensions_to_check: list[int] = datum["dimensions"]
             if hamming_distance(hash_from_user, hash_to_check) < 4:
                 return 8
-            if abs(
-                dimensions[0]
-                / dimensions[1]
-                - dimensions_to_check[0]
-                / dimensions_to_check[1]
-            ) <= 0.05 and hamming_distance(hash_from_user, hash_to_check) < 10:
-                return 5
-        return 0
+            hit = 1 - abs(dimensions[0] / dimensions[1] - dimensions_to_check[0] / dimensions_to_check[1])
+            ham = max(10 - hamming_distance(hash_from_user, hash_to_check), 0)
+            score = hit * ham
+            if score > best_score:
+                best_score = score
+        return int(best_score)
 
     async def hashes(self) -> list:
         return loads(str(await self.env.KV.get("phashes")).strip())
