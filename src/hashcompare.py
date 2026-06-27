@@ -15,6 +15,8 @@ class Default(WorkerEntrypoint):
                 return await self.hashcompare(request)
             elif pathname.startswith("/hashlist"):
                 return await self.hashlist(request)
+            elif pathname.startswith("/scamscore"):
+                return await self.scamscore(request)
             else:
                 return Response(status=404)
         except Exception:
@@ -35,16 +37,54 @@ class Default(WorkerEntrypoint):
     async def hashlist(self, request: Request) -> Response:
         return Response(dumps(await self.hashes()), headers=self.json_header)
 
+    async def scamscore(self, request: Request) -> Response:
+        url = urlsplit(request.url)
+        queries = parse_qs(url.query)
+        errors: list = []
+        if "hash" not in queries.keys():
+            errors.append('Missing \'hash\' parameter')
+        if "dimensions" not in queries.keys():
+            errors.append('Missing \'dimensions\' parameter')
+        dimensions: tuple[int,int] = (int(queries["dimensions"][0]), int(queries["dimensions"][1]))
+        hash_from_user = queries["hash"][0]
+        result: int = await self.compare_hashes_and_dimensions(hash_from_user, dimensions)
+        return Response(f'{{"result": {int(result)}}}', headers=self.json_header, status=404 if not result else 200)
+
     async def compare_hashes(self, hash_from_user: str) -> bool:
-        if hash_from_user in await self.hashes():
+        hashes = await self.hashes()
+        if hash_from_user in hashes:
             return True
-        for hash_to_check in await self.hashes():
+        for hash_to_check in hashes:
             if hamming_distance(hash_from_user, hash_to_check) < 4:
                 return True
         return False
 
+    async def compare_hashes_and_dimensions(self, hash_from_user: str, dimensions: tuple[int, int]) -> int:
+        hashes = await self.hashes()
+        if hash_from_user in hashes:
+            return 10
+        hashes_and_dimensions = await self.hashes_and_dimensions()
+        for datum in hashes_and_dimensions:
+            hash_to_check: str = datum["phash"]
+            dimensions_to_check: list[int] = datum["dimensions"]
+            if hamming_distance(hash_from_user, hash_to_check) < 4:
+                return 8
+            if abs(
+                settings.image_data["dimensions"]["width"]
+                / settings.image_data["dimensions"]["height"]
+                - image_data2["dimensions"]["width"]
+                / image_data2["dimensions"]["height"]
+            ) <= 0.05:
+                return 5
+        return 0
+
     async def hashes(self) -> list:
         return loads(str(await self.env.KV.get("phashes")).strip())
+
+    async def hashes_and_dimensions(self) -> list[dict]:
+        return loads(str(await self.env.KV.get("phashes_and_dimensions")).strip())
+
+
 
 
 def hamming_distance(s1: str, s2: str) -> int:
