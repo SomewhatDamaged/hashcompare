@@ -72,10 +72,10 @@ class Default(WorkerEntrypoint):
             if hamming_distance(hash_from_user, hash_to_check) < 4:
                 return 8
             if abs(
-                settings.image_data["dimensions"]["width"]
-                / settings.image_data["dimensions"]["height"]
-                - image_data2["dimensions"]["width"]
-                / image_data2["dimensions"]["height"]
+                dimensions[0]
+                / dimensions[1]
+                - dimensions_to_check[0]
+                / dimensions_to_check[1]
             ) <= 0.05 and hamming_distance(hash_from_user, hash_to_check) < 10:
                 return 5
         return 0
