@@ -47,7 +47,7 @@ class Default(WorkerEntrypoint):
             errors.append('Missing \'dimensions\' parameter')
         if errors:
             return Response(f'{{"error": {errors}}}', headers=self.json_header, status=400)
-        dimensions: tuple[int,int] = (int(queries["dimensions"][0]), int(queries["dimensions"][1]))
+        dimensions: tuple[int,int] = (int(queries["dimensions"][0].split(',',1)[0]), int(queries["dimensions"][0].split(',',1)[1]))
         hash_from_user = queries["hash"][0]
         result: int = await self.compare_hashes_and_dimensions(hash_from_user, dimensions)
         return Response(f'{{"result": {int(result)}}}', headers=self.json_header, status=404 if not result else 200)
