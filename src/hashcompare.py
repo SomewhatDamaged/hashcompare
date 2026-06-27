@@ -77,7 +77,7 @@ class Default(WorkerEntrypoint):
             score = hit * ham
             if score > best_score:
                 best_score = score
-        return int(best_score)
+        return int(round(best_score))
 
     async def hashes(self) -> list:
         return loads(str(await self.env.KV.get("phashes")).strip())
