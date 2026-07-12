@@ -2,6 +2,7 @@ from urllib.parse import urlsplit, parse_qs, urlparse
 from workers import WorkerEntrypoint, Response, Request
 import traceback
 from json import dumps, loads
+from multiprocessing import Pool
 
 
 class Default(WorkerEntrypoint):
@@ -61,23 +62,25 @@ class Default(WorkerEntrypoint):
                 return True
         return False
 
+    def score(self, hash_and_dimensions: dict) -> Union[int, float]:
+        hash_from_user = hash_and_dimensions["hash_from_user"]
+        hash_to_check: str = hash_and_dimensions["phash"]
+        dimensions_to_check: list[int] = datum["dimensions"]
+        if hamming_distance(hash_from_user, hash_to_check) < 4:
+            return 8
+        hit = 1 - abs(dimensions[0] / dimensions[1] - dimensions_to_check[0] / dimensions_to_check[1])
+        ham = max(10 - hamming_distance(hash_from_user, hash_to_check), 0)
+        return hit * ham
+
     async def compare_hashes_and_dimensions(self, hash_from_user: str, dimensions: tuple[int, int]) -> int:
         hashes = await self.hashes()
         if hash_from_user in hashes:
             return 10
-        hashes_and_dimensions = await self.hashes_and_dimensions()
-        best_score: Union[float, int] = 0
-        for datum in hashes_and_dimensions:
-            hash_to_check: str = datum["phash"]
-            dimensions_to_check: list[int] = datum["dimensions"]
-            if hamming_distance(hash_from_user, hash_to_check) < 4:
-                return 8
-            hit = 1 - abs(dimensions[0] / dimensions[1] - dimensions_to_check[0] / dimensions_to_check[1])
-            ham = max(10 - hamming_distance(hash_from_user, hash_to_check), 0)
-            score = hit * ham
-            if score > best_score:
-                best_score = score
-        return int(round(best_score))
+        hashes_and_dimensions = [dict(item, **{"hash_from_user": hash_from_user}) for item in await self.hashes_and_dimensions()]
+        with Pool() as pool:
+            results = pool.map(self.score, hashes_and_dimensions)
+        results.sort(reverse=True)
+        return int(round(results[0]))
 
     async def hashes(self) -> list:
         return loads(str(await self.env.KV.get("phashes")).strip())
