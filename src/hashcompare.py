@@ -3,6 +3,7 @@ from workers import WorkerEntrypoint, Response, Request
 import traceback
 from json import dumps, loads
 from multiprocessing import Pool
+from typing import Union
 
 
 class Default(WorkerEntrypoint):
