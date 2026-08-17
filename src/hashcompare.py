@@ -30,28 +30,35 @@ class Default(WorkerEntrypoint):
 
     async def report(self, request: Request) -> Response:
         headers = dict(request.headers)
+        # Check auth presence and if it has a bearer token
         if "authorization" not in headers.keys():
-            return Response('{"error": "Missing \'authorization\' parameter"}', status=400)
+            return Response('{"error": "Missing \'authorization\' parameter"}', headers=self.json_header, status=400)
         if not headers["authorization"].startswith("Bearer "):
-            return Response('{"error": "Bad \'authorization\' parameter"}', status=400)
+            return Response('{"error": "Bad \'authorization\' parameter"}', headers=self.json_header, status=400)
+        # Check url presence
         if "url" not in headers.keys():
-            return Response('{"error": "Missing \'url\' parameter"}', status=400)
+            return Response('{"error": "Missing \'url\' parameter"}', headers=self.json_header, status=400)
+        # Check authorization
         key = headers["authorization"].split(" ")[1]
         authorized_data = loads(str(await self.env.KEYS.get(key)).strip())
         if authorized_data is None:
-            return Response('{"error": "Invalid \'key\' parameter"}', status=401)
+            return Response('{"error": "Invalid \'key\' parameter"}', headers=self.json_header, status=401)
         if "report" not in authorized_data["access"]:
-            return Response('{"error": "You do not have access to this endpoint"}', status=403)
+            return Response('{"error": "You do not have access to this endpoint"}', headers=self.json_header, status=403)
+        # Checking url is valid
         url = headers["url"]
+        # Downloading and checking it
         file_response = await fetch(url)
         if file_response.ok:
-            return Response(f'{{"error": "Could not download file from: {url}\nError status (from remote server): {file_response.status}"}}', status=400)
+            return Response(f'{{"error": "Could not download file from: {url}\nError status (from remote server): {file_response.status}"}}', headers=self.json_header, status=400)
         if not file_response.headers["content-type"].startswith("image/"):
-            return Response(f'{{"error": "File is not type \'image/\': {file_response.headers["content-type"]}"}}', status=400)
+            return Response(f'{{"error": "File is not type \'image/\': {file_response.headers["content-type"]}"}}', headers=self.json_header, status=400)
+        # Build file name + extension
         file_name = url.rsplit("/",1)[1]
         extension = file_response.headers["content-type"].split("/")[1]
-        await self.env.reported-images.put(f"api-reported/{key}/{file_name}.{extension}")
-        return Response('{"result": "success"}', headers=headers, status=200)
+        # Upload to R2!
+        await self.env.reported-images.put(f"api-reported/{key}/{file_name}.{extension}", file_response.body, block=True)
+        return Response('{"result": "success"}', headers=self.json_header, status=200)
 
     # GET Handlers
 
