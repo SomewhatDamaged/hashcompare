@@ -1,5 +1,5 @@
 from urllib.parse import urlsplit, parse_qs, urlparse
-from workers import WorkerEntrypoint, Response, Request
+from workers import WorkerEntrypoint, Response, Request, fetch
 import traceback
 from json import dumps, loads
 
@@ -11,17 +11,49 @@ class Default(WorkerEntrypoint):
             url = urlparse(request.url)
             pathname = url.path
             pathname = pathname[3:]
-            if pathname.startswith("/hashcompare"):
-                return await self.hashcompare(request)
-            elif pathname.startswith("/hashlist"):
-                return await self.hashlist(request)
-            elif pathname.startswith("/scamscore"):
-                return await self.scamscore(request)
-            else:
-                return Response(status=404)
+            if request.method == "GET":
+                if pathname.startswith("/hashcompare"):
+                    return await self.hashcompare(request)
+                elif pathname.startswith("/hashlist"):
+                    return await self.hashlist(request)
+                elif pathname.startswith("/scamscore"):
+                    return await self.scamscore(request)
+            if request.method == "POST":
+                if pathname.startswith("/report"):
+                    return await self.report(request)
+            return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
             return Response(f"Traceback: {traceback.format_exc()}", headers=headers, status=500)
+
+    # POST Handlers
+
+    async def report(self, request: Request) -> Response:
+        headers = dict(request.headers)
+        if "authorization" not in headers.keys():
+            return Response('{"error": "Missing \'authorization\' parameter"}', status=400)
+        if not headers["authorization"].startswith("Bearer "):
+            return Response('{"error": "Bad \'authorization\' parameter"}', status=400)
+        if "url" not in headers.keys():
+            return Response('{"error": "Missing \'url\' parameter"}', status=400)
+        key = headers["authorization"].split(" ")[1]
+        authorized_data = loads(str(await self.env.KEYS.get(key)).strip())
+        if authorized_data is None:
+            return Response('{"error": "Invalid \'key\' parameter"}', status=401)
+        if "report" not in authorized_data["access"]:
+            return Response('{"error": "You do not have access to this endpoint"}', status=403)
+        url = headers["url"]
+        file_response = await fetch(url)
+        if file_response.ok:
+            return Response(f'{{"error": "Could not download file from: {url}\nError status (from remote server): {file_response.status}"}}', status=400)
+        if not file_response.headers["content-type"].startswith("image/"):
+            return Response(f'{{"error": "File is not type \'image/\': {file_response.headers["content-type"]}"}}', status=400)
+        file_name = url.rsplit("/",1)[1]
+        extension = file_response.headers["content-type"].split("/")[1]
+        await self.env.reported-images.put(f"api-reported/{key}/{file_name}.{extension}")
+        return Response('{"result": "success"}', headers=headers, status=200)
+
+    # GET Handlers
 
     async def hashcompare(self, request: Request) -> Response:
         url = urlsplit(request.url)

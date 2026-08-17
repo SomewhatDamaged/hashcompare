@@ -13,6 +13,17 @@
 		{
 		  	"binding": "KV",
 		  	"id": "23afec1d4a7140648064e0f047a49fc5"
+		},
+		{
+			"binding": "KEYS",
+			"id": "68e27c55cdf34d9791ddf245f1d21bcd"
 		}
-  	]
+  	],
+	"r2_buckets": [
+		{
+			"binding": "reported-images",
+			"bucket_name": "reported-images"
+		}
+	]
+
 }
