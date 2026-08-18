@@ -41,9 +41,10 @@ class Default(WorkerEntrypoint):
         # Check authorization
         key = headers["authorization"].split(" ")[1]
         key_data = await self.env.KEYS.get(key)
+        raise ValueError(f"{key_data = }")
         if key_data is None:
             return Response('{"error": "Invalid \'key\' parameter"}', headers=self.json_header, status=401)
-        authorized_data = loads(str().strip())
+        authorized_data = loads(str(key_data).strip())
         if authorized_data is None:
             return Response('{"error": "Error parsing key data from KV storage"}', headers=self.json_header, status=500)
         if "report" not in authorized_data["access"]:
