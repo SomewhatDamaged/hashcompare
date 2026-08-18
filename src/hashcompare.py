@@ -57,7 +57,7 @@ class Default(WorkerEntrypoint):
         file_name = url.rsplit("/",1)[1]
         extension = file_response.headers["content-type"].split("/")[1]
         # Upload to R2!
-        await self.env.reported-images.put(f"api-reported/{key}/{file_name}.{extension}", file_response.body, block=True)
+        await self.env.REPORTSTORAGE.put(f"api-reported/{key}/{file_name}.{extension}", file_response.body, block=True)
         return Response('{"result": "success"}', headers=self.json_header, status=200)
 
     # GET Handlers

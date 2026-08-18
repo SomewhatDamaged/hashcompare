@@ -21,9 +21,8 @@
   	],
 	"r2_buckets": [
 		{
-			"binding": "reported-images",
+			"binding": "REPORTSTORAGE",
 			"bucket_name": "reported-images"
 		}
 	]
-
 }
