@@ -53,6 +53,7 @@ class Default(WorkerEntrypoint):
         # Check to see if it exists...
         check_existence = await self.env.REPORTSTORAGE.head(f"api-reported/{authorized}/{file_name}.{extension}")
         if check_existence:
+            # Sprinkle in a little entropy if it does
             file_name += f"-{randint(1000000,9999999)}"
         await self.env.REPORTSTORAGE.put(f"api-reported/{authorized}/{file_name}.{extension}", file_response.body, block=True)
         return Response('{"result": "success"}', headers=self.json_header, status=200)
