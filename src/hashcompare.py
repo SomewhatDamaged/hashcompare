@@ -49,7 +49,7 @@ class Default(WorkerEntrypoint):
         url = headers["url"]
         # Downloading and checking it
         file_response = await fetch(url)
-        if file_response.ok:
+        if not file_response.ok:
             return Response(f'{{"error": "Could not download file from: {url}\nError status (from remote server): {file_response.status}"}}', headers=self.json_header, status=400)
         if not file_response.headers["content-type"].startswith("image/"):
             return Response(f'{{"error": "File is not type \'image/\': {file_response.headers["content-type"]}"}}', headers=self.json_header, status=400)
