@@ -67,7 +67,7 @@ class Default(WorkerEntrypoint):
         authorized_data = loads(key_data)
         if authorized_data is None:
             return Response('{"error": "Error parsing key data from KV storage"}', headers=self.json_header, status=500)
-        if "report" not in authorized_data["access"]:
+        if endpoint_name not in authorized_data["access"]:
             return Response('{"error": "You do not have access to this endpoint"}', headers=self.json_header, status=403)
         return key
 
