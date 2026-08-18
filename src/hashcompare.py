@@ -2,6 +2,7 @@ from urllib.parse import urlsplit, parse_qs, urlparse
 from workers import WorkerEntrypoint, Response, Request, fetch
 import traceback
 from json import dumps, loads
+from typing import Union
 
 
 class Default(WorkerEntrypoint):
