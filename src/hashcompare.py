@@ -3,7 +3,7 @@ from workers import WorkerEntrypoint, Response, Request, fetch
 import traceback
 from json import dumps, loads
 from typing import Union
-from random import randint
+from datetime import datetime, UTC
 
 
 class Default(WorkerEntrypoint):
@@ -47,14 +47,9 @@ class Default(WorkerEntrypoint):
         if not file_response.headers["content-type"].startswith("image/"):
             return Response(f'{{"error": "File is not type \'image/\': {file_response.headers["content-type"]}"}}', headers=self.json_header, status=400)
         # Build file name + extension
-        file_name = url.rsplit("/",1)[1].rsplit(".",1)[0]
+        file_name = f'{datetime.now(UTC).isoformat()}-{url.rsplit("/",1)[1].split(".",1)[0]}'
         extension = file_response.headers["content-type"].split("/")[1]
         # Upload to R2!
-        # Check to see if it exists...
-        check_existence = await self.env.REPORTSTORAGE.head(f"api-reported/{authorized}/{file_name}.{extension}")
-        if check_existence:
-            # Sprinkle in a little entropy if it does
-            file_name += f"-{randint(1000000,9999999)}"
         await self.env.REPORTSTORAGE.put(f"api-reported/{authorized}/{file_name}.{extension}", file_response.body, block=True)
         return Response('{"result": "success"}', headers=self.json_header, status=200)
 
