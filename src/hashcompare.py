@@ -54,7 +54,7 @@ class Default(WorkerEntrypoint):
         if not file_response.headers["content-type"].startswith("image/"):
             return Response(f'{{"error": "File is not type \'image/\': {file_response.headers["content-type"]}"}}', headers=self.json_header, status=400)
         # Build file name + extension
-        file_name = url.rsplit("/",1)[1]
+        file_name = url.rsplit("/",1)[1].replace(".", "_")
         extension = file_response.headers["content-type"].split("/")[1]
         # Upload to R2!
         await self.env.REPORTSTORAGE.put(f"api-reported/{key}/{file_name}.{extension}", file_response.body, block=True)
