@@ -40,6 +40,7 @@ class Default(WorkerEntrypoint):
             return Response('{"error": "Missing \'url\' parameter"}', headers=self.json_header, status=400)
         # Check authorization
         key = headers["authorization"].split(" ")[1]
+        raise ValueError(f"{key} check")
         authorized_data = loads(str(await self.env.KEYS.get(key)).strip())
         if authorized_data is None:
             return Response('{"error": "Invalid \'key\' parameter"}', headers=self.json_header, status=401)
