@@ -40,10 +40,9 @@ class Default(WorkerEntrypoint):
             return Response('{"error": "Missing \'url\' parameter"}', headers=self.json_header, status=400)
         # Check authorization
         key = headers["authorization"].split(" ")[1]
-        key_data = str(await self.env.KEYS.get(key, default=None)).strip()
+        key_data = str(await self.env.KEYS.get(key)).strip()
         if not key_data.startswith("{"):
             return Response('{"error": "Invalid \'key\' parameter"}', headers=self.json_header, status=401)
-        raise ValueError(f"{key_data = }")
         authorized_data = loads(key_data)
         if authorized_data is None:
             return Response('{"error": "Error parsing key data from KV storage"}', headers=self.json_header, status=500)
