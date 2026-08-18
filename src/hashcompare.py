@@ -49,12 +49,12 @@ class Default(WorkerEntrypoint):
         file_name = url.rsplit("/",1)[1].rsplit(".",1)[0]
         extension = file_response.headers["content-type"].split("/")[1]
         # Upload to R2!
-        await self.env.REPORTSTORAGE.put(f"api-reported/{key}/{file_name}.{extension}", file_response.body, block=True)
+        await self.env.REPORTSTORAGE.put(f"api-reported/{authorized}/{file_name}.{extension}", file_response.body, block=True)
         return Response('{"result": "success"}', headers=self.json_header, status=200)
 
     # POST Special functions
 
-    async def authenticate(self, request: Request, endpoint_name: str) -> Union[Response,dict]:
+    async def authenticate(self, request: Request, endpoint_name: str) -> Union[Response,str]:
         headers = dict(request.headers)
         if "authorization" not in headers.keys():
             return Response('{"error": "Missing \'authorization\' parameter"}', headers=self.json_header, status=400)
@@ -69,7 +69,7 @@ class Default(WorkerEntrypoint):
             return Response('{"error": "Error parsing key data from KV storage"}', headers=self.json_header, status=500)
         if "report" not in authorized_data["access"]:
             return Response('{"error": "You do not have access to this endpoint"}', headers=self.json_header, status=403)
-        return True
+        return key
 
     # GET Handlers
 
