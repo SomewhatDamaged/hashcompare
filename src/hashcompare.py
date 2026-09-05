@@ -33,7 +33,7 @@ class Default(WorkerEntrypoint):
     # POST Handlers
 
     ocr_default = {
-            "image": "https://cdn.discordapp.com/attachments/1521391036864266380/1545646635403444284/image0.png?ex=6a9ce71a&is=6a9b959a&hm=e52ff6693fc2d1727d9fb803bd93ee0de31d80d091c6f8016f59df2aa5271623&",
+            "image": "https://cdn.excessive.space/ShareX/2026/09/firefox_Hi2j0f5zwg.png",
             "question": "OCR this image"
         }
 
