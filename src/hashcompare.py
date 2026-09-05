@@ -36,7 +36,7 @@ class Default(WorkerEntrypoint):
 
 
     async def ocr(self, request: Request) -> Response:
-        image_url = "https://cdn.discordapp.com/attachments/1521391036864266380/1545676252923301898/Employment.png?ex=6a9d02af&is=6a9bb12f&hm=f7b698c876cfce6192d31b24a3cea16249a96b3c2b9bc84d8c15b4afbb163796&"
+        image_url = "https://cdn.discordapp.com/attachments/160386989819035648/1545680353283407932/image.png?ex=6a9d0681&is=6a9bb501&hm=37807f6a6697e7f38d7a08f720769104c02c3c3cb280aed6db7219a7db50dc3a&"
         image_response = await pyfetch(image_url)
         if not image_response.ok:
             return Response("Failed to fetch image source", headers={"content-type": "text/plain;charset=UTF-8"}, status=400)
