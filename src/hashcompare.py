@@ -4,6 +4,7 @@ import traceback
 from json import dumps, loads
 from typing import Union
 from datetime import datetime, UTC
+from js import fetch as pyfetch
 
 
 class Default(WorkerEntrypoint):
@@ -35,12 +36,19 @@ class Default(WorkerEntrypoint):
 
     async def ocr(self, request: Request) -> Response:
         image_url = "https://cdn.excessive.space/ShareX/2026/09/firefox_Hi2j0f5zwg.png"
+        image_response = await pyfetch(image_url)
+        if not image_response.ok:
+            return Response("Failed to fetch image source", status=400)
+        blob = await image_response.blob()
+        array_buffer = await blob.arrayBuffer()
+        python_bytes = array_buffer.to_py().tobytes()
+        base64_encoded = base64.b64encode(python_bytes).decode('utf-8')
         ocr_default = {
             "task": "query",
-            "question": "OCR this image. Read all of the visible text completely.",
+            "question": "OCR this image",
             "temperature": 0.0
         }
-        ocr_default["image"] = image_url
+        ocr_default["image"] = f"data:image/png;base64,{base64_encoded}"
         answer = await self.env.AI.run('@cf/moondream/moondream3.1-9B-A2B', ocr_default)
         return Response(answer, headers={"content-type": "text/plain;charset=UTF-8"}, status=200)
 
