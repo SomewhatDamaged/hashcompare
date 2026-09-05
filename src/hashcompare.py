@@ -35,15 +35,8 @@ class Default(WorkerEntrypoint):
     ocr_default = {
         "type": "object",
         "properties": {
-            "image": {
-                "type": "https://cdn.excessive.space/ShareX/2026/09/firefox_Hi2j0f5zwg.png",
-                "description": "Input image as a public HTTPS URL or base64 data URI. Optional for `query`; required for `caption`, `point`, and `detect`."
-            },
-            "question": {
-                "type": "string",
-                "default": "Please OCR this image",
-                "description": "Question for the `query` task."
-            }
+            "image": "https://cdn.excessive.space/ShareX/2026/09/firefox_Hi2j0f5zwg.png",
+            "question": "OCR this image"
         }
     }
 
