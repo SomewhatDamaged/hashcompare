@@ -4,7 +4,7 @@ import traceback
 from json import dumps, loads
 from typing import Union
 from datetime import datetime, UTC
-from js import fetch as pyfetch, Int32Array
+from js import fetch as pyfetch, Uint8Array, Array
 
 
 class Default(WorkerEntrypoint):
@@ -41,13 +41,14 @@ class Default(WorkerEntrypoint):
             return Response("Failed to fetch image source", status=400)
         blob = await image_response.blob()
         array_buffer = await blob.arrayBuffer()
-        int_array = Int32Array.new(array_buffer)
+        uint8_bytes = Uint8Array.new(array_buffer)
+        js_numeric_array = Array.from_(uint8_bytes)
         ocr_default = {
             "task": "query",
             "question": "OCR this image",
             "temperature": 0.0
         }
-        ocr_default["image"] = int_array
+        ocr_default["image"] = js_numeric_array
         answer = await self.env.AI.run('@cf/moondream/moondream3.1-9B-A2B', ocr_default)
         return Response(answer, headers={"content-type": "text/plain;charset=UTF-8"}, status=200)
 
