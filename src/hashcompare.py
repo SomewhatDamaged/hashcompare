@@ -48,7 +48,7 @@ class Default(WorkerEntrypoint):
     }
 
     async def ocr(self, request: Request) -> Response:
-        answer = await env.ai.run('@cf/moondream/moondream3.1-9B-A2B', self.ocr_default)
+        answer = await self.env.ai.run('@cf/moondream/moondream3.1-9B-A2B', self.ocr_default)
         return Response(answer, headers={"content-type": "text/plain;charset=UTF-8"}, status=200)
 
     async def report(self, request: Request) -> Response:
