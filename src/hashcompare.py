@@ -25,9 +25,8 @@ class Default(WorkerEntrypoint):
             if request.method == "POST":
                 if pathname.startswith("/report"):
                     return await self.report(request)
-                if pathname.startswith("/ocr"):
-                    pass
-                    # return await self.ocr(request)
+                if pathname.startswith("/ocr") and False: # This endpoint currently disabled.
+                    return await self.ocr(request)
             return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
