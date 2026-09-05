@@ -35,7 +35,7 @@ class Default(WorkerEntrypoint):
     ocr_default = {
             "image": "https://cdn.excessive.space/ShareX/2026/09/firefox_Hi2j0f5zwg.png",
             "question": "OCR this image",
-            "reasoning": False,
+            "temperature": 0.0,
             "stream": False
         }
 
