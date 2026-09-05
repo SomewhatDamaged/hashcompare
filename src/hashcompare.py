@@ -42,13 +42,12 @@ class Default(WorkerEntrypoint):
         blob = await image_response.blob()
         array_buffer = await blob.arrayBuffer()
         uint8_array = Uint8Array.new(array_buffer)
-        image_list = list(uint8_array)
         ocr_default = {
             "task": "query",
-            "image": image_list,
             "question": "OCR this image",
             "temperature": 0.0
         }
+        ocr_default["image"] = list(uint8_array)
         answer = await self.env.AI.run('@cf/moondream/moondream3.1-9B-A2B', ocr_default)
         return Response(answer, headers={"content-type": "text/plain;charset=UTF-8"}, status=200)
 
