@@ -48,7 +48,7 @@ class Default(WorkerEntrypoint):
             "task": "query",
             "question": "OCR this image",
             "temperature": 0.0,
-            "stream": False
+            "reasoning": False
         }
         ocr_default["image"] = f"data:image/png;base64,{base64_encoded}"
         answer = await self.env.AI.run('@cf/moondream/moondream3.1-9B-A2B', ocr_default)
