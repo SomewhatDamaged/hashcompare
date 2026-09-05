@@ -24,5 +24,8 @@
 			"binding": "REPORTSTORAGE",
 			"bucket_name": "reported-images"
 		}
-	]
+	],
+	"ai": {
+		"binding": "AI" // i.e. available in your Worker on env.AI
+	}
 }

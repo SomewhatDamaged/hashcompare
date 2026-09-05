@@ -23,12 +23,33 @@ class Default(WorkerEntrypoint):
             if request.method == "POST":
                 if pathname.startswith("/report"):
                     return await self.report(request)
+                if pathname.startswith("/ocr"):
+                    return await self.ocr(request)
             return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
             return Response(f"Traceback: {traceback.format_exc()}", headers=headers, status=500)
 
     # POST Handlers
+
+    ocr_default = {
+        "type": "object",
+        "properties": {
+            "image": {
+                "type": "https://cdn.excessive.space/ShareX/2026/09/firefox_Hi2j0f5zwg.png",
+                "description": "Input image as a public HTTPS URL or base64 data URI. Optional for `query`; required for `caption`, `point`, and `detect`."
+            },
+            "question": {
+                "type": "string",
+                "default": "Please OCR this image",
+                "description": "Question for the `query` task."
+            }
+        }
+    }
+
+    async def ocr(self, request: Request) -> Response:
+        answer = await env.ai.run('@cf/moondream/moondream3.1-9B-A2B', self.ocr_default)
+        return Response(answer, headers={"content-type": "text/plain;charset=UTF-8"}, status=200)
 
     async def report(self, request: Request) -> Response:
         headers = dict(request.headers)
@@ -85,7 +106,7 @@ class Default(WorkerEntrypoint):
         result: bool = await self.compare_hashes(hash_from_user)
         return Response(f'{{"result": {str(result).lower()}}}', headers=self.json_header, status=404 if not result else 200)
 
-    async def hashlist(self, request: Request) -> Response:
+    async def hashlist(self, _: Request) -> Response:
         return Response(dumps(await self.hashes()), headers=self.json_header)
 
     async def scamscore(self, request: Request) -> Response:
