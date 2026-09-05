@@ -4,6 +4,7 @@ import traceback
 from json import dumps, loads
 from typing import Union
 from datetime import datetime, UTC
+import base64
 from js import fetch as pyfetch
 
 
