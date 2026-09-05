@@ -33,12 +33,9 @@ class Default(WorkerEntrypoint):
     # POST Handlers
 
     ocr_default = {
-        "type": "object",
-        "properties": {
             "image": "https://cdn.excessive.space/ShareX/2026/09/firefox_Hi2j0f5zwg.png",
             "question": "OCR this image"
         }
-    }
 
     async def ocr(self, request: Request) -> Response:
         answer = await self.env.AI.run('@cf/moondream/moondream3.1-9B-A2B', self.ocr_default)
