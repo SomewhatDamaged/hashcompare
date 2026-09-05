@@ -46,7 +46,7 @@ class Default(WorkerEntrypoint):
         base64_encoded = base64.b64encode(python_bytes).decode('utf-8')
         ocr_default = {
             "task": "query",
-            "question": "OCR this image",
+            "question": "OCR this image. Output text in JSON format",
             "temperature": 0.0,
             "reasoning": False
         }
