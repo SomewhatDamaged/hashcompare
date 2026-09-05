@@ -48,7 +48,6 @@ class Default(WorkerEntrypoint):
             "task": "query",
             "question": "OCR this image",
             "temperature": 0.0,
-            "reasoning": False,
             "stream": False
         }
         ocr_default["image"] = f"data:image/png;base64,{base64_encoded}"
