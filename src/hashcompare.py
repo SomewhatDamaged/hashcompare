@@ -26,7 +26,8 @@ class Default(WorkerEntrypoint):
                 if pathname.startswith("/report"):
                     return await self.report(request)
                 if pathname.startswith("/ocr"):
-                    return await self.ocr(request)
+                    pass
+                    # return await self.ocr(request)
             return Response(status=404)
         except Exception:
             headers = {"content-type": "text/plain;charset=UTF-8"}
