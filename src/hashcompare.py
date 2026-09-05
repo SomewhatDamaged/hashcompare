@@ -47,7 +47,7 @@ class Default(WorkerEntrypoint):
             "question": "OCR this image",
             "temperature": 0.0
         }
-        ocr_default["image"] = list(uint8_array)
+        ocr_default["image"] = uint8_array
         answer = await self.env.AI.run('@cf/moondream/moondream3.1-9B-A2B', ocr_default)
         return Response(answer, headers={"content-type": "text/plain;charset=UTF-8"}, status=200)
 
