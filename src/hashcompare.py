@@ -39,7 +39,7 @@ class Default(WorkerEntrypoint):
         image_url = "https://cdn.discordapp.com/attachments/1521391036864266380/1545676252923301898/Employment.png?ex=6a9d02af&is=6a9bb12f&hm=f7b698c876cfce6192d31b24a3cea16249a96b3c2b9bc84d8c15b4afbb163796&"
         image_response = await pyfetch(image_url)
         if not image_response.ok:
-            return Response("Failed to fetch image source", status=400)
+            return Response("Failed to fetch image source", headers={"content-type": "text/plain;charset=UTF-8"}, status=400)
         blob = await image_response.blob()
         array_buffer = await blob.arrayBuffer()
         python_bytes = array_buffer.to_py().tobytes()
