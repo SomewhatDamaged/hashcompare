@@ -25,7 +25,7 @@ class Default(WorkerEntrypoint):
             if request.method == "POST":
                 if pathname.startswith("/report"):
                     return await self.report(request)
-                if pathname.startswith("/ocr") and False: # This endpoint currently disabled.
+                if pathname.startswith("/ocr"): # enabled! and False: # This endpoint currently disabled.
                     return await self.ocr(request)
             return Response(status=404)
         except Exception:
@@ -46,7 +46,7 @@ class Default(WorkerEntrypoint):
         base64_encoded = base64.b64encode(python_bytes).decode('utf-8')
         ocr_default = {
             "task": "query",
-            "question": "OCR this image. Output text in JSON format",
+            "question": "OCR this image. Output text in JSON format and provide a score showing how likely it is to be a scam",
             "temperature": 0.0,
             "reasoning": False
         }
