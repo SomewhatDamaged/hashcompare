@@ -36,7 +36,12 @@ class Default(WorkerEntrypoint):
 
 
     async def ocr(self, request: Request) -> Response:
-        image_url = "https://cdn.discordapp.com/attachments/472065242835320853/1560703399329005729/IMG-20260818-WA0117.jpg?ex=6ad3adce&is=6ad25c4e&hm=41628a426a2b3275893880168bf286ade4537bd082598b76a2a017d04ad71826&"
+        authorized = await self.authenticate(request, "report")
+        if isinstance(authorized, Response):
+            return authorized
+        headers = dict(request.headers)
+        prompt = headers.get("prompt", "OCR this image. Output in JSON format. Provide a \"text\" field that contains all the recognizable text. Provide a \"score\" with the values of \"low\" \"medium\" or \"high\" showing how likely it is to be a scam")
+        image_url = headers.get("image", "https://cdn.discordapp.com/attachments/472065242835320853/1560703399329005729/IMG-20260818-WA0117.jpg?ex=6ad3adce&is=6ad25c4e&hm=41628a426a2b3275893880168bf286ade4537bd082598b76a2a017d04ad71826&")
         image_response = await pyfetch(image_url)
         if not image_response.ok:
             return Response("Failed to fetch image source", headers={"content-type": "text/plain;charset=UTF-8"}, status=400)
@@ -46,7 +51,7 @@ class Default(WorkerEntrypoint):
         base64_encoded = base64.b64encode(python_bytes).decode('utf-8')
         ocr_default = {
             "task": "query",
-            "question": "OCR this image. Output in JSON format. Provide a \"text\" field that contains all the recognizable text. Provide a \"score\" with the values of \"low\" \"medium\" or \"high\" showing how likely it is to be a scam",
+            "question": prompt,
             "temperature": 0.0,
             "reasoning": False
         }
