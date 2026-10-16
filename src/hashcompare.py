@@ -46,7 +46,7 @@ class Default(WorkerEntrypoint):
         base64_encoded = base64.b64encode(python_bytes).decode('utf-8')
         ocr_default = {
             "task": "query",
-            "question": "OCR this image. Output text in JSON format and provide a score showing how likely it is to be a scam",
+            "question": "OCR this image. Output in JSON format. Provide a \"text\" field that contains all the recognizable text. Provide a \"score\" from 0 to 10 showing how likely it is to be a scam",
             "temperature": 0.0,
             "reasoning": False
         }
