@@ -22,6 +22,8 @@ class Default(WorkerEntrypoint):
                     return await self.hashlist(request)
                 elif pathname.startswith("/scamscore"):
                     return await self.scamscore(request)
+                elif pathname.startswith("/scam_strings_list"):
+                    return await self.scam_strings_list(request)
             if request.method == "POST":
                 if pathname.startswith("/report"):
                     return await self.report(request)
@@ -112,6 +114,9 @@ class Default(WorkerEntrypoint):
     async def hashlist(self, _: Request) -> Response:
         return Response(dumps(await self.hashes()), headers=self.json_header)
 
+    async def scam_string_list(self, _: Request) -> Response:
+        return Response(dumps(await self.scam_strings()), headers=self.json_header)
+
     async def scamscore(self, request: Request) -> Response:
         url = urlsplit(request.url)
         queries = parse_qs(url.query)
@@ -156,6 +161,9 @@ class Default(WorkerEntrypoint):
 
     async def hashes(self) -> list:
         return loads(str(await self.env.KV.get("phashes")).strip())
+
+    async def scam_strings(self) -> list:
+        return loads(str(await self.env.KV.get("string_list")).strip())
 
     async def hashes_and_dimensions(self) -> list[dict]:
         return loads(str(await self.env.KV.get("phashes_and_dimensions")).strip())
