@@ -25,7 +25,7 @@ class Default(WorkerEntrypoint):
             if request.method == "POST":
                 if pathname.startswith("/report"):
                     return await self.report(request)
-                if pathname.startswith("/ocr"): # enabled! and False: # This endpoint currently disabled.
+                if pathname.startswith("/ocr") and False: # This endpoint currently disabled.
                     return await self.ocr(request)
             return Response(status=404)
         except Exception:
@@ -49,13 +49,8 @@ class Default(WorkerEntrypoint):
         array_buffer = await blob.arrayBuffer()
         python_bytes = array_buffer.to_py().tobytes()
         base64_encoded = base64.b64encode(python_bytes).decode('utf-8')
-        ocr_default = {
-            "task": "query",
-            "question": prompt,
-            "temperature": 0.0,
-            "reasoning": False
-        }
-        ocr_default["image"] = f"data:image/png;base64,{base64_encoded}"
+        ocr_default = {"task": "query", "question": prompt, "temperature": 0.0, "reasoning": False,
+                       "image": f"data:image/png;base64,{base64_encoded}"}
         answer = await self.env.AI.run('@cf/moondream/moondream3.1-9B-A2B', ocr_default)
         return Response(answer, headers={"content-type": "text/plain;charset=UTF-8"}, status=200)
 
