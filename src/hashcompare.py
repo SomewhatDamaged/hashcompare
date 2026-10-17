@@ -114,7 +114,7 @@ class Default(WorkerEntrypoint):
     async def hashlist(self, _: Request) -> Response:
         return Response(dumps(await self.hashes()), headers=self.json_header)
 
-    async def scam_string_list(self, _: Request) -> Response:
+    async def scam_strings_list(self, _: Request) -> Response:
         return Response(dumps(await self.scam_strings()), headers=self.json_header)
 
     async def scamscore(self, request: Request) -> Response:
